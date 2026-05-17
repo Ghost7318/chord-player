@@ -1,0 +1,1054 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>コードマスター</title>
+    <style>
+        :root {
+            --primary: #4a90e2;
+            --secondary: #50e3c2;
+            --success: #2ecc71;
+            --warning: #f1c40f;
+            --danger: #e74c3c;
+            --bg: #f0f4f8;
+            --card-bg: #ffffff;
+            --text: #2c3e50;
+        }
+
+        body {
+            font-family: 'Helvetica Neue', Arial, 'Hiragino Kaku Gothic ProN', 'Hiragino Sans', Meiryo, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .container {
+            max-width: 1000px;
+            width: 100%;
+            background: var(--card-bg);
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+            box-sizing: border-box;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 2.2rem;
+            color: #1a252f;
+        }
+
+        /* タブ切り替え */
+        .tabs {
+            display: flex;
+            justify-content: center;
+            gap: 5px;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #e2e8f0;
+            padding-bottom: 10px;
+            flex-wrap: wrap;
+        }
+
+        .tab-btn {
+            background: none;
+            border: none;
+            padding: 10px 15px;
+            font-size: 0.95rem;
+            cursor: pointer;
+            color: #7f8c8d;
+            font-weight: bold;
+            border-radius: 6px;
+        }
+
+        .tab-btn.active {
+            color: var(--primary);
+            background: rgba(74, 144, 226, 0.1);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* セクション共通 */
+        .section {
+            background: #fdfdfd;
+            border: 1px solid #e2e8f0;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        /* コントロール */
+        .control-panel {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            background: #eef2f7;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 25px;
+        }
+
+        select {
+            padding: 8px 16px;
+            font-size: 1rem;
+            border-radius: 6px;
+            border: 1px solid #cbd5e1;
+            font-weight: bold;
+        }
+
+        /* ボタン関係 */
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 10px;
+        }
+
+        button {
+            padding: 10px 16px;
+            font-size: 0.95rem;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            background: #e2e8f0;
+            color: #47525e;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        }
+
+        .btn-preset { background: var(--primary); color: white; text-align: left; font-size: 0.9rem; }
+        .btn-preset:hover { background: #357abd; }
+        .btn-chord { background: #fff; border: 2px solid #e2e8f0; min-width: 80px; }
+        .btn-chord:active, .btn-chord.active { background: var(--secondary); color: #1a252f; border-color: var(--secondary); }
+        .btn-action { background: #2c3e50; color: white; }
+        .btn-action:hover { background: #1a252f; }
+        .btn-ref { background: #7f8c8d; color: white; }
+        .btn-repeat { background: var(--warning); color: #1a252f; }
+
+        .btn-preset .sub-text {
+            display: block;
+            font-size: 0.75rem;
+            font-weight: normal;
+            color: #e0e6ed;
+            margin-top: 2px;
+        }
+
+        /* メインディスプレイ */
+        #display-panel {
+            background: #1a252f;
+            color: #ecf0f1;
+            padding: 25px;
+            border-radius: 12px;
+            text-align: center;
+            margin-bottom: 25px;
+            min-height: 100px;
+        }
+
+        .current-chord { font-size: 2.5rem; font-weight: bold; color: var(--secondary); margin: 0; }
+        .notes-info { font-size: 1.2rem; margin-top: 8px; color: #bdc3c7; letter-spacing: 1px; }
+        .progression-display { display: flex; justify-content: center; gap: 12px; margin-top: 15px; flex-wrap: wrap; }
+        .prog-step { padding: 8px 16px; background: #34495e; border-radius: 6px; font-weight: bold; transition: all 0.2s; }
+        .prog-step.playing { background: var(--secondary); color: #1a252f; transform: scale(1.1); }
+
+        /* ゲームエリア */
+        .game-box {
+            text-align: center;
+            padding: 20px;
+            background: #fff;
+            border: 2px dashed #cbd5e1;
+            border-radius: 12px;
+        }
+
+        .question-text { font-size: 1.5rem; font-weight: bold; margin-bottom: 20px; }
+        .game-status { font-size: 1.2rem; font-weight: bold; margin-top: 15px; height: auto; min-height: 30px; line-height: 1.6; }
+        
+        /* 鍵盤風の選択肢 */
+        .keyboard-select {
+            display: flex;
+            justify-content: center;
+            gap: 5px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+        .key-btn {
+            background: white;
+            border: 2px solid #333;
+            width: 50px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.9rem;
+            border-radius: 4px;
+        }
+        .key-btn.selected {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .octave-box {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 10px;
+            margin: 10px 0;
+        }
+        .octave-title {
+            font-size: 0.85rem;
+            color: #64748b;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>🎵 コードマスター</h1>
+
+    <!-- 全体共通：キー設定 -->
+    <div class="control-panel">
+        <label for="key-select" style="font-weight: bold; font-size: 1.1rem;">🎼 全体のキー (Key):</label>
+        <select id="key-select" onchange="changeKey()">
+            <option value="0">C / Am</option>
+            <option value="1">C# / A#m</option>
+            <option value="2">D / Bm</option>
+            <option value="3">D# / Cm</option>
+            <option value="4">E / C#m</option>
+            <option value="5">F / Dm</option>
+            <option value="6">F# / D#m</option>
+            <option value="7">G / Em</option>
+            <option value="8">G# / Fm</option>
+            <option value="9">A / F#m</option>
+            <option value="10">A# / Gm</option>
+            <option value="11">B / G#m</option>
+        </select>
+        <span style="font-size: 0.85rem; color: #666;">※変更するとコードが自動で移調されます</span>
+    </div>
+
+    <!-- モード切り替えタブ -->
+    <div class="tabs">
+        <button class="tab-btn active" onclick="switchTab('learn')">📖 コードを学ぶ・聴く</button>
+        <button class="tab-btn" onclick="switchTab('game-scale')">🌈 音階・教会旋法クイズ</button>
+        <button class="tab-btn" onclick="switchTab('game-interval')">📐 二音の音程クイズ</button>
+        <button class="tab-btn" onclick="switchTab('game-quality')">💎 和音の種類あて</button>
+        <button class="tab-btn" onclick="switchTab('game-pitch')">👂 音名あて (単音)</button>
+        <button class="tab-btn" onclick="switchTab('game-notes')">🧩 構成音あて</button>
+        <button class="tab-btn" onclick="switchTab('game-prog')">🎧 進行みみコピ</button>
+    </div>
+
+    <!-- メインディスプレイ (学習用) -->
+    <div id="learn-tab" class="tab-content active">
+        <div id="display-panel">
+            <p id="chord-name" class="current-chord">お好きな進行かコードをタップ</p>
+            <div id="notes-list" class="notes-info">構成音: --</div>
+            <div id="prog-flow" class="progression-display"></div>
+        </div>
+
+        <div class="section">
+            <h2>✨ 厳選！定番コード進行 (18選)</h2>
+            <div class="btn-group" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 10px;">
+                <button class="btn-preset" onclick="playPreset('王道進行')">🌟 王道進行<span class="sub-text">IVM7 - V7 - IIIm7 - VIm (J-POPサビの王様)</span></button>
+                <button class="btn-preset" onclick="playPreset('小室進行')">⚡ 小室進行<span class="sub-text">VIm - IV - V - I (疾走感・ボカロ・アニソン)</span></button>
+                <button class="btn-preset" onclick="playPreset('丸サ進行')">🍸 丸サ・JTTU進行<span class="sub-text">IVM7 - III7 - VIm7 - I7 (おしゃれ・都会的)</span></button>
+                <button class="btn-preset" onclick="playPreset('丸サ派生')">🏙️ 丸サ進行（終止形アレンジ）<span class="sub-text">IVM7 - III7 - VIm7 - bVII7 (よりエモい解決)</span></button>
+                <button class="btn-preset" onclick="playPreset('カノン進行')">🌸 カノン進行<span class="sub-text">I - V - VIm - IIIm - IV - I... (感動系バラード)</span></button>
+                <button class="btn-preset" onclick="playPreset('ポップパンク')">🎸 ポップパンク進行<span class="sub-text">I - V - VIm - IV (爽快・洋楽・スタジアム)</span></button>
+                <button class="btn-preset" onclick="playPreset('切ない系')">💧 切ない系4561進行<span class="sub-text">IV - V - VIm - I (胸に深く残るメロディライン)</span></button>
+                <button class="btn-preset" onclick="playPreset('米津風進行')">🍋 ドラマチックJ-POP進行<span class="sub-text">IV - V - VIm - III (セカンダリードミナントの切なさ)</span></button>
+                <button class="btn-preset" onclick="playPreset('王道終止')">🔥 王道終止アレンジ<span class="sub-text">IVM7 - V7 - IIIm7 - III7 (サビの最高潮)</span></button>
+                <button class="btn-preset" onclick="playPreset('レトロ歌謡')">🏮 レトロ歌謡進行<span class="sub-text">IVM7 - III7 - VIm - VIm (和風・哀愁を帯びたエモさ)</span></button>
+                <button class="btn-preset" onclick="playPreset('エモコア')">☄️ エモコア進行<span class="sub-text">VIm - I - V - IV (激しさと切なさの共存)</span></button>
+                <button class="btn-preset" onclick="playPreset('チル系')">☕ チル・Lo-Fi系進行<span class="sub-text">I - VIm - IV - V (50年代・心地よい響き)</span></button>
+                <button class="btn-preset" onclick="playPreset('スパニッシュ')">💃 スパニッシュ進行<span class="sub-text">IVm - IIIm - IIm - I (情熱的・ミステリアス)</span></button>
+                <button class="btn-preset" onclick="playPreset('ジャストマイサイズ')">🌌 ジャスト・マイ・サイズ進行<span class="sub-text">IVM7 - V7 - I - VIm (R&B・HipHopにも最適)</span></button>
+                <button class="btn-preset" onclick="playPreset('エピカル')">🏔️ エピカル(壮大)進行<span class="sub-text">VIm - bVI - bVII - I (映画音楽やゲームのクライマックス)</span></button>
+                <button class="btn-preset" onclick="playPreset('サビ前定番')">大サビ前転換進行<span class="sub-text">IV - V - VIm - VIm (高揚感を最大限貯める)</span></button>
+                <button class="btn-preset" onclick="playPreset('哀愁ループ')">🥀 哀愁ループ進行<span class="sub-text">IIm7 - V7 - IM7 - VIm7 (ジャズやシティポップ)</span></button>
+                <button class="btn-preset" onclick="playPreset('12小節ブルース')">🎷 ブルース進行<span class="sub-text">I7 - IV7 - V7... (アドリブ・セッション定番)</span></button>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>🎹 コード単体演奏</h2>
+            <h3>主要メジャー系</h3>
+            <div class="btn-group" id="major-chords-pool"></div>
+            <h3>主要マイナー/セブンス/その他</h3>
+            <div class="btn-group" id="minor-chords-pool"></div>
+        </div>
+    </div>
+
+    <!-- ゲーム：音階＆教会旋法クイズ -->
+    <div id="game-scale-tab" class="tab-content">
+        <div class="game-box">
+            <h2>🌈 音階・教会旋法クイズ (Scale & Mode Quiz)</h2>
+            <p>1音ずつ順番に上昇する「音階」や「教会旋法（チャーチ・モード）」を聴いて種類を当ててください！</p>
+            <div style="margin: 15px 0; display: flex; justify-content: center; gap: 10px;">
+                <button class="btn-action" onclick="startScaleGame()">新しい問題を出す 🎲</button>
+                <button class="btn-repeat" id="btn-scale-repeat" onclick="repeatScaleGameSound()" disabled>🔄 問題の音をもう一度聴く</button>
+            </div>
+            
+            <div class="question-text" id="gs-question-text" style="margin-top:20px; color: var(--primary);">どんな音階の並び？👂</div>
+            
+            <div class="btn-group" style="justify-content: center; margin-top: 25px;" id="gs-options"></div>
+
+            <div id="gs-status" class="game-status" style="margin-top:20px;"></div>
+        </div>
+    </div>
+
+    <!-- 二音の音程クイズ -->
+    <div id="game-interval-tab" class="tab-content">
+        <div class="game-box">
+            <h2>📐 二音の音程クイズ (Interval Quiz)</h2>
+            <p>楽典に基づく2音のインターバル（音程）クイズです。度数のひびきを聴き当ててください！</p>
+            <div style="margin: 15px 0; display: flex; justify-content: center; gap: 10px;">
+                <button class="btn-action" onclick="startIntervalGame()">新しい問題を出す 🎲</button>
+                <button class="btn-repeat" id="btn-interval-repeat" onclick="repeatIntervalGameSound()" disabled>🔄 問題の音をもう一度聴く</button>
+            </div>
+            
+            <div class="question-text" id="gi-question-text" style="margin-top:20px; color: var(--primary);">二音の間隔（音程）はどれ？👂</div>
+            
+            <div class="btn-group" style="justify-content: center; margin-top: 25px;" id="gi-options"></div>
+
+            <div id="gi-status" class="game-status" style="margin-top:20px;"></div>
+        </div>
+    </div>
+
+    <!-- ゲーム：和音の種類あて -->
+    <div id="game-quality-tab" class="tab-content">
+        <div class="game-box">
+            <h2>💎 和音の種類あてクイズ (Chord Quality Quiz)</h2>
+            <p>ジャーンと鳴った和音（3和音）の響きを聴いて、どの種類のコードか当ててください！</p>
+            <div style="margin: 15px 0; display: flex; justify-content: center; gap: 10px;">
+                <button class="btn-action" onclick="startQualityGame()">新しい問題を出す 🎲</button>
+                <button class="btn-repeat" id="btn-quality-repeat" onclick="repeatQualityGameSound()" disabled>🔄 問題の音をもう一度聴く</button>
+            </div>
+            
+            <div class="question-text" id="gq-question-text" style="margin-top:20px; color: var(--primary);">どんな響きがする？👂</div>
+            
+            <div class="btn-group" style="justify-content: center; margin-top: 25px;" id="gq-options"></div>
+
+            <div id="gq-status" class="game-status" style="margin-top:20px;"></div>
+        </div>
+    </div>
+
+    <!-- ゲーム：音名あて -->
+    <div id="game-pitch-tab" class="tab-content">
+        <div class="game-box">
+            <h2>👂 音名あてゲーム (単音ピッチ判定)</h2>
+            <p>鳴った一本の音が「何の音」かを聴き当ててください！(全3オクターブ)</p>
+            <div style="margin: 15px 0; display: flex; justify-content: center; gap: 10px; flex-wrap: wrap;">
+                <button class="btn-action" onclick="startPitchGame()">新しい問題を出す 🎲</button>
+                <button class="btn-repeat" id="btn-pitch-repeat" onclick="repeatPitchGameSound()" disabled>🔄 問題の音をもう一度聴く</button>
+                <button class="btn-ref" onclick="playC4Reference()">🔔 基準音を聴く (C4 / 真ん中のド)</button>
+            </div>
+            
+            <div class="question-text" style="margin-top:20px; color: var(--primary);">どの高さの、何の音？</div>
+            
+            <div class="octave-box">
+                <div class="octave-title">🔼 高音域 (オクターブ5)</div>
+                <div class="btn-group" style="justify-content: center;" id="pitch-options-5"></div>
+            </div>
+            <div class="octave-box">
+                <div class="octave-title">⏺️ 中音域 (オクターブ4 / 基準音の高さ)</div>
+                <div class="btn-group" style="justify-content: center;" id="pitch-options-4"></div>
+            </div>
+            <div class="octave-box">
+                <div class="octave-title">🔽 低音域 (オクターブ3)</div>
+                <div class="btn-group" style="justify-content: center;" id="pitch-options-3"></div>
+            </div>
+
+            <div id="pt-status" class="game-status" style="margin-top:20px;"></div>
+        </div>
+    </div>
+
+    <!-- ゲーム：構成音あて -->
+    <div id="game-notes-tab" class="tab-content">
+        <div class="game-box">
+            <h2>🧩 構成音あてゲーム</h2>
+            <p>提示されたコードを構成する音をすべて選んで「解答」を押してください！</p>
+            <div style="margin: 15px 0; display: flex; justify-content: center; gap: 10px;">
+                <button class="btn-action" onclick="startNotesGame()">新しい問題を出す 🎲</button>
+                <button class="btn-repeat" id="btn-notes-repeat" onclick="repeatNotesGameSound()" disabled>🔄 コード音をもう一度聴く</button>
+            </div>
+            
+            <div id="ng-question" class="question-text" style="margin-top:20px;">---</div>
+            
+            <div class="keyboard-select" id="keyboard-options"></div>
+
+            <button class="btn-action" style="background:var(--success);" onclick="checkNotesGameAnswer()">解答する</button>
+            <div id="ng-status" class="game-status"></div>
+        </div>
+    </div>
+
+    <!-- ゲーム：進行みみコピ -->
+    <div id="game-prog-tab" class="tab-content">
+        <div class="game-box">
+            <h2>🎧 コード進行みみコピゲーム</h2>
+            <p>流れるコード進行を耳で聴いて、どの進行かを当ててください！</p>
+            <div style="margin: 15px 0; display: flex; justify-content: center; gap: 10px;">
+                <button class="btn-action" onclick="startProgGame()">新しい問題を出す & 進行再生 🎲</button>
+                <button class="btn-repeat" id="btn-prog-repeat" onclick="repeatProgGameSound()" disabled>🔄 進行をもう一度聴く</button>
+            </div>
+            
+            <div id="pg-options" class="btn-group" style="justify-content: center; margin-top: 25px;"></div>
+            
+            <div id="pg-status" class="game-status" style="margin-top:20px;"></div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    const AudioContext = window.AudioContext || window.webkitAudioContext;
+    let audioCtx = null;
+    let currentKeyShift = 0;
+
+    const NOTE_NAMES = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+    const NOTE_NAMES_JP = ['ド', 'ド#', 'レ', 'レ#', 'ミ', 'ファ', 'ファ#', 'ソ', 'ソ#', 'ラ', 'ラ#', 'シ'];
+
+    const CHORD_TEMPLATES = {
+        'I':    { root: 0, intervals: [0, 4, 7], suffix: '', display: 'メジャー' },
+        'I7':   { root: 0, intervals: [0, 4, 7, 10], suffix: '7', display: 'セブンス' },
+        'IIm':  { root: 2, intervals: [0, 3, 7], suffix: 'm', display: 'マイナー' },
+        'IIm7': { root: 2, intervals: [0, 3, 7, 10], suffix: 'm7', display: 'マイナーセブンス' },
+        'IIIm': { root: 4, intervals: [0, 3, 7], suffix: 'm', display: 'マイナー' },
+        'IIIm7':{ root: 4, intervals: [0, 3, 7, 10], suffix: 'm7', display: 'マイナーセブンス' },
+        'IV':   { root: 5, intervals: [0, 4, 7], suffix: '', display: 'メジャー' },
+        'IV7':  { root: 5, intervals: [0, 4, 7, 10], suffix: '7', display: 'セブンス' },
+        'IVm':  { root: 5, intervals: [0, 3, 7], suffix: 'm', display: 'マイナー' },
+        'IVM7': { root: 5, intervals: [0, 4, 7, 11], suffix: 'M7', display: 'メジャーセブンス' },
+        'V':    { root: 7, intervals: [0, 4, 7], suffix: '', display: 'メジャー' },
+        'V7':   { root: 7, intervals: [0, 4, 7, 10], suffix: '7', display: 'セブンス' },
+        'VIm':  { root: 9, intervals: [0, 3, 7], suffix: 'm', display: 'マイナー' },
+        'VIm7': { root: 9, intervals: [0, 3, 7, 10], suffix: 'm7', display: 'マイナーセブンス' },
+        'III7': { root: 4, intervals: [0, 4, 7, 10], suffix: '7', display: 'セブンス' },
+        'bVI':  { root: 8, intervals: [0, 4, 7], suffix: '', display: 'メジャー' },
+        'bVII': { root: 10, intervals: [0, 4, 7], suffix: '', display: 'メジャー' },
+        'bVII7':{ root: 10, intervals: [0, 4, 7, 10], suffix: '7', display: 'セブンス' },
+        'IM7':  { root: 0, intervals: [0, 4, 7, 11], suffix: 'M7', display: 'メジャーセブンス' }
+    };
+
+    const PROGRESSIONS = {
+        '王道進行': ['IVM7', 'V7', 'IIIm7', 'VIm'],
+        '小室進行': ['VIm', 'IV', 'V', 'I'],
+        '丸サ進行': ['IVM7', 'III7', 'VIm7', 'I7'],
+        '丸サ派生': ['IVM7', 'III7', 'VIm7', 'bVII7'],
+        'カノン進行': ['I', 'V', 'VIm', 'IIIm', 'IV', 'I', 'IV', 'V'],
+        'ポップパンク': ['I', 'V', 'VIm', 'IV'],
+        '切ない系': ['IV', 'V', 'VIm', 'I'],
+        '米津風進行': ['IV', 'V', 'VIm', 'III7'],
+        '王道終止': ['IVM7', 'V7', 'IIIm7', 'III7'],
+        'レトロ歌謡': ['IVM7', 'III7', 'VIm', 'VIm'],
+        'エモコア': ['VIm', 'I', 'V', 'IV'],
+        'チル系': ['I', 'VIm', 'IV', 'V'],
+        'スパニッシュ': ['IVm', 'IIIm', 'IIm', 'I'],
+        'ジャストマイサイズ': ['IVM7', 'V7', 'I', 'VIm'],
+        'エピカル': ['VIm', 'bVI', 'bVII', 'I'],
+        'サビ前定番': ['IV', 'V', 'VIm', 'VIm'],
+        '哀愁ループ': ['IIm7', 'V7', 'IM7', 'VIm7'],
+        '12小節ブルース': ['I7', 'IV7', 'I7', 'I7', 'IV7', 'IV7', 'I7', 'I7', 'V7', 'IV7', 'I7', 'V7']
+    };
+
+    const QUALITY_TEMPLATES = {
+        'major':    { nameEn: 'Major',    nameJa: '長三和音 (メジャー)', intervals: [0, 4, 7] },
+        'minor':    { nameEn: 'Minor',    nameJa: '短三和音 (マイナー)', intervals: [0, 3, 7] },
+        'diminish': { nameEn: 'dim',      nameJa: '減三和音 (ディミニッシュ)', intervals: [0, 3, 6] },
+        'augment':  { nameEn: 'aug',      nameJa: '増三和音 (オーギュメント)', intervals: [0, 4, 8] }
+    };
+
+    const SCALE_TEMPLATES = {
+        'major': { nameEn: 'Major Scale', nameJa: 'メジャースケール (長音階)', intervals: [0, 2, 4, 5, 7, 9, 11, 12] },
+        'natural_minor': { nameEn: 'Natural Minor', nameJa: '自然的短音階 (ナチュラルマイナー)', intervals: [0, 2, 3, 5, 7, 8, 10, 12] },
+        'harmonic_minor': { nameEn: 'Harmonic Minor', nameJa: '和性的短音階 (ハーモニックマイナー)', intervals: [0, 2, 3, 5, 7, 8, 11, 12] },
+        'melodic_minor': { nameEn: 'Melodic Minor', nameJa: '旋律的短音階 (メロディックマイナー)', intervals: [0, 2, 3, 5, 7, 9, 11, 12] },
+        'ionian': { nameEn: 'Ionian Mode', nameJa: 'アイオニアン旋法', intervals: [0, 2, 4, 5, 7, 9, 11, 12] },
+        'dorian': { nameEn: 'Dorian Mode', nameJa: 'ドリアン旋法', intervals: [0, 2, 3, 5, 7, 9, 10, 12] },
+        'phrygian': { nameEn: 'Phrygian Mode', nameJa: 'フリジアン旋法', intervals: [0, 1, 3, 5, 7, 8, 10, 12] },
+        'lydian': { nameEn: 'Lydian Mode', nameJa: 'リディアン旋法', intervals: [0, 2, 4, 6, 7, 9, 11, 12] },
+        'mixolydian': { nameEn: 'Mixolydian Mode', nameJa: 'ミクソリディアン旋法', intervals: [0, 2, 4, 5, 7, 9, 10, 12] },
+        'aeolian': { nameEn: 'Aeolian Mode', nameJa: 'エオリアン旋法', intervals: [0, 2, 3, 5, 7, 8, 10, 12] },
+        'locrian': { nameEn: 'Locrian Mode', nameJa: 'ロクリアン旋法', intervals: [0, 1, 3, 5, 6, 8, 10, 12] }
+    };
+
+    const INTERVAL_TEMPLATES = {
+        'm2': { nameEn: 'Minor 2nd', nameJa: '短2度', semitones: 1 },
+        'M2': { nameEn: 'Major 2nd', nameJa: '長2度', semitones: 2 },
+        'm3': { nameEn: 'Minor 3rd', nameJa: '短3度', semitones: 3 },
+        'M3': { nameEn: 'Major 3rd', nameJa: '長3度', semitones: 4 },
+        'P4': { nameEn: 'Perfect 4th', nameJa: '完全4度', semitones: 5 },
+        'tritone': { nameEn: 'Tritone (aug4 / dim5)', nameJa: '増4度 / 減5度 (トライトーン)', semitones: 6 },
+        'P5': { nameEn: 'Perfect 5th', nameJa: '完全5度', semitones: 7 },
+        'm6': { nameEn: 'Minor 6th', nameJa: '短6度', semitones: 8 },
+        'M6': { nameEn: 'Major 6th', nameJa: '長6度', semitones: 9 },
+        'm7': { nameEn: 'Minor 7th', nameJa: '短7度', semitones: 10 },
+        'M7': { nameEn: 'Major 7th', nameJa: '長7度', semitones: 11 },
+        'P8': { nameEn: 'Octave', nameJa: '完全8度 (オクターブ)', semitones: 12 }
+    };
+
+    function getChordInfo(templateKey, keyShift = currentKeyShift) {
+        const tpl = CHORD_TEMPLATES[templateKey];
+        if(!tpl) return { name: templateKey, notes: [], labels: [] };
+        
+        const rootSemis = (tpl.root + keyShift) % 12;
+        const chordName = NOTE_NAMES[rootSemis] + tpl.suffix;
+        
+        const absoluteNotes = tpl.intervals.map(inter => (rootSemis + inter) % 12);
+        const labels = absoluteNotes.map(n => NOTE_NAMES_JP[n]);
+        const noteNumbers = tpl.intervals.map(inter => 60 + rootSemis + inter);
+
+        return { name: chordName, noteNumbers: noteNumbers, labels: labels, absoluteNotes: absoluteNotes };
+    }
+
+    function initAudio() {
+        if (!audioCtx) audioCtx = new AudioContext();
+    }
+
+    function playTone(freq, startTime, duration) {
+        const osc = audioCtx.createOscillator();
+        const gainNode = audioCtx.createGain();
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(freq, startTime);
+        gainNode.gain.setValueAtTime(0.25, startTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.001, startTime + duration);
+        osc.connect(gainNode);
+        gainNode.connect(audioCtx.destination);
+        osc.start(startTime);
+        osc.stop(startTime + duration);
+    }
+
+    function playChordById(templateKey, startTime = 0, duration = 1.0, updateUI = true) {
+        initAudio();
+        const info = getChordInfo(templateKey);
+        const now = audioCtx.currentTime;
+
+        if (updateUI && document.getElementById('learn-tab').classList.contains('active')) {
+            document.getElementById('chord-name').innerText = info.name;
+            document.getElementById('notes-list').innerText = `構成音: ${info.labels.join(' / ')}`;
+        }
+
+        info.noteNumbers.forEach(num => {
+            const freq = 440 * Math.pow(2, (num - 69) / 12);
+            playTone(freq, now + startTime, duration);
+        });
+    }
+
+    let isPlayingPreset = false;
+    function playPreset(name) {
+        if (isPlayingPreset) return;
+        isPlayingPreset = true;
+
+        const prog = PROGRESSIONS[name];
+        if (!prog) { isPlayingPreset = false; return; }
+
+        const flow = document.getElementById('prog-flow');
+        flow.innerHTML = '';
+        prog.forEach((ch, idx) => {
+            const step = document.createElement('div');
+            step.className = 'prog-step';
+            step.innerText = getChordInfo(ch).name;
+            step.id = `step-${idx}`;
+            flow.appendChild(step);
+        });
+
+        const tempo = 1.0;
+        prog.forEach((ch, idx) => {
+            const start = idx * tempo;
+            playChordById(ch, start, tempo - 0.05, false);
+            setTimeout(() => {
+                document.querySelectorAll('.prog-step').forEach(el => el.classList.remove('playing'));
+                const current = document.getElementById(`step-${idx}`);
+                if (current) current.classList.add('playing');
+                
+                const info = getChordInfo(ch);
+                document.getElementById('chord-name').innerText = info.name;
+                document.getElementById('notes-list').innerText = `構成音: ${info.labels.join(' / ')}`;
+            }, start * 1000);
+        });
+
+        setTimeout(() => {
+            document.querySelectorAll('.prog-step').forEach(el => el.classList.remove('playing'));
+            isPlayingPreset = false;
+        }, prog.length * tempo * 1000);
+    }
+
+    function renderChordsPool() {
+        const majorPool = document.getElementById('major-chords-pool');
+        const minorPool = document.getElementById('minor-chords-pool');
+        majorPool.innerHTML = '';
+        minorPool.innerHTML = '';
+
+        Object.keys(CHORD_TEMPLATES).forEach(key => {
+            const info = getChordInfo(key);
+            const btn = document.createElement('button');
+            btn.className = 'btn-chord';
+            btn.innerText = info.name;
+            btn.onclick = () => playChordById(key);
+            
+            if (CHORD_TEMPLATES[key].suffix === '' || CHORD_TEMPLATES[key].suffix === 'M7' || CHORD_TEMPLATES[key].suffix === 'IM7') {
+                majorPool.appendChild(btn);
+            } else {
+                minorPool.appendChild(btn);
+            }
+        });
+    }
+
+    function changeKey() {
+        currentKeyShift = parseInt(document.getElementById('key-select').value);
+        renderChordsPool();
+        document.getElementById('chord-name').innerText = "Keyを変更しました";
+        document.getElementById('notes-list').innerText = "構成音: --";
+        document.getElementById('prog-flow').innerHTML = '';
+    }
+
+    function switchTab(tabId) {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+        
+        event.target.classList.add('active');
+        document.getElementById(`${tabId}-tab`).classList.add('active');
+    }
+
+    // --- 音階（スケール）＆ 教会旋法 クイズ ---
+    let currentQuizScaleKey = '';
+    let currentQuizScaleRoot = 0;
+
+    function startScaleGame() {
+        initAudio();
+        document.getElementById('gs-status').innerText = '再生中...👂';
+        document.getElementById('gs-status').style.color = 'var(--text)';
+        
+        const keys = Object.keys(SCALE_TEMPLATES);
+        currentQuizScaleKey = keys[Math.floor(Math.random() * keys.length)];
+        currentQuizScaleRoot = Math.floor(Math.random() * 12) + 60; // C4(60)～B4(71)固定
+
+        playScale(currentQuizScaleRoot, currentQuizScaleKey);
+        document.getElementById('btn-scale-repeat').disabled = false;
+        buildScaleGameUI();
+    }
+
+    function repeatScaleGameSound() {
+        if (currentQuizScaleKey && currentQuizScaleRoot) {
+            playScale(currentQuizScaleRoot, currentQuizScaleKey);
+        }
+    }
+
+    function playScale(rootMidi, scaleKey) {
+        initAudio();
+        const tpl = SCALE_TEMPLATES[scaleKey];
+        const now = audioCtx.currentTime;
+        const noteSpeed = 0.32;
+
+        tpl.intervals.forEach((inter, idx) => {
+            const midiNum = rootMidi + inter;
+            const freq = 440 * Math.pow(2, (midiNum - 69) / 12);
+            playTone(freq, now + (idx * noteSpeed), 0.38);
+        });
+    }
+
+    function buildScaleGameUI() {
+        const container = document.getElementById('gs-options');
+        container.innerHTML = '';
+
+        Object.keys(SCALE_TEMPLATES).forEach(key => {
+            const tpl = SCALE_TEMPLATES[key];
+            const btn = document.createElement('button');
+            btn.className = 'btn-preset';
+            btn.style.background = '#34495e';
+            btn.innerHTML = `${tpl.nameEn} <span style="font-size:0.75rem; display:block; font-weight:normal;">(${tpl.nameJa})</span>`;
+            btn.onclick = () => checkScaleGameAnswer(key);
+            container.appendChild(btn);
+        });
+    }
+
+    function checkScaleGameAnswer(chosenKey) {
+        if (!currentQuizScaleKey) return;
+        
+        const statusEl = document.getElementById('gs-status');
+        const correctTpl = SCALE_TEMPLATES[currentQuizScaleKey];
+        const rootNameEn = NOTE_NAMES[currentQuizScaleRoot % 12];
+
+        if (chosenKey === currentQuizScaleKey) {
+            statusEl.innerText = `🎉 正解！これは「 ${rootNameEn} を主音とする ${correctTpl.nameEn} (${correctTpl.nameJa}) 」です！`;
+            statusEl.style.color = 'var(--success)';
+        } else {
+            statusEl.innerText = `😢 残念... 正解は「 ${rootNameEn} の ${correctTpl.nameEn} (${correctTpl.nameJa}) 」でした！`;
+            statusEl.style.color = 'var(--danger)';
+        }
+    }
+
+    // --- 二音の音程（インターバル）クイズ ---
+    let currentQuizIntervalKey = '';
+    let currentQuizIntervalRoot = 0;
+
+    function startIntervalGame() {
+        initAudio();
+        document.getElementById('gi-status').innerText = '再生中...👂';
+        document.getElementById('gi-status').style.color = 'var(--text)';
+
+        const keys = Object.keys(INTERVAL_TEMPLATES);
+        currentQuizIntervalKey = keys[Math.floor(Math.random() * keys.length)];
+        currentQuizIntervalRoot = Math.floor(Math.random() * 12) + 55; // G3〜F#4の間でランダム選択
+
+        playInterval(currentQuizIntervalRoot, currentQuizIntervalKey);
+        document.getElementById('btn-interval-repeat').disabled = false;
+        buildIntervalGameUI();
+    }
+
+    function repeatIntervalGameSound() {
+        if (currentQuizIntervalKey && currentQuizIntervalRoot) {
+            playInterval(currentQuizIntervalRoot, currentQuizIntervalKey);
+        }
+    }
+
+    function playInterval(rootMidi, intervalKey) {
+        initAudio();
+        const tpl = INTERVAL_TEMPLATES[intervalKey];
+        const now = audioCtx.currentTime;
+
+        const freq1 = 440 * Math.pow(2, (rootMidi - 69) / 12);
+        const freq2 = 440 * Math.pow(2, ((rootMidi + tpl.semitones) - 69) / 12);
+
+        playTone(freq1, now, 0.6);
+        playTone(freq2, now + 0.5, 0.6);
+        playTone(freq1, now + 1.2, 1.2);
+        playTone(freq2, now + 1.2, 1.2);
+    }
+
+    function buildIntervalGameUI() {
+        const container = document.getElementById('gi-options');
+        container.innerHTML = '';
+
+        Object.keys(INTERVAL_TEMPLATES).forEach(key => {
+            const tpl = INTERVAL_TEMPLATES[key];
+            const btn = document.createElement('button');
+            btn.className = 'btn-preset';
+            btn.style.background = '#34495e';
+            btn.innerHTML = `${tpl.nameJa} <span style="font-size:0.75rem; display:block; font-weight:normal;">(${tpl.nameEn})</span>`;
+            btn.onclick = () => checkIntervalGameAnswer(key);
+            container.appendChild(btn);
+        });
+    }
+
+    function getMidiNoteNameWithOctave(midiNum) {
+        const noteName = NOTE_NAMES[midiNum % 12];
+        const octave = Math.floor(midiNum / 12) - 1;
+        return `${noteName}${octave}`;
+    }
+
+    function checkIntervalGameAnswer(chosenKey) {
+        if (!currentQuizIntervalKey) return;
+
+        const statusEl = document.getElementById('gi-status');
+        const correctTpl = INTERVAL_TEMPLATES[currentQuizIntervalKey];
+
+        const note1Name = getMidiNoteNameWithOctave(currentQuizIntervalRoot);
+        const note2Name = getMidiNoteNameWithOctave(currentQuizIntervalRoot + correctTpl.semitones);
+
+        if (chosenKey === currentQuizIntervalKey) {
+            statusEl.innerHTML = `🎉 正解！音程は「 **${correctTpl.nameJa} (${correctTpl.nameEn})** 」です！<br><span style="color:#7f8c8d; font-size:0.95rem;">🎵 実際の構成音名: <strong>${note1Name} & ${note2Name}</strong></span>`;
+            statusEl.style.color = 'var(--success)';
+        } else {
+            statusEl.innerHTML = `😢 残念... 正解は「 **${correctTpl.nameJa} (${correctTpl.nameEn})** 」でした！<br><span style="color:#7f8c8d; font-size:0.95rem;">🎵 実際の構成音名: <strong>${note1Name} & ${note2Name}</strong></span>`;
+            statusEl.style.color = 'var(--danger)';
+        }
+    }
+
+
+    // --- 和音の種類あて ---
+    let currentQuizQualityKey = '';
+    let currentQuizQualityRoot = 0;
+
+    function startQualityGame() {
+        initAudio();
+        document.getElementById('gq-status').innerText = '再生中...👂';
+        document.getElementById('gq-status').style.color = 'var(--text)';
+        
+        const keys = Object.keys(QUALITY_TEMPLATES);
+        currentQuizQualityKey = keys[Math.floor(Math.random() * keys.length)];
+        currentQuizQualityRoot = Math.floor(Math.random() * 12) + 60;
+
+        playQualityChord(currentQuizQualityRoot, currentQuizQualityKey);
+        document.getElementById('btn-quality-repeat').disabled = false;
+        buildQualityGameUI();
+    }
+
+    function repeatQualityGameSound() {
+        if (currentQuizQualityKey && currentQuizQualityRoot) {
+            playQualityChord(currentQuizQualityRoot, currentQuizQualityKey);
+        }
+    }
+
+    function playQualityChord(rootMidi, qualityKey) {
+        initAudio();
+        const tpl = QUALITY_TEMPLATES[qualityKey];
+        const now = audioCtx.currentTime;
+
+        tpl.intervals.forEach(inter => {
+            const midiNum = rootMidi + inter;
+            const freq = 440 * Math.pow(2, (midiNum - 69) / 12);
+            playTone(freq, now, 1.5);
+        });
+    }
+
+    function buildQualityGameUI() {
+        const container = document.getElementById('gq-options');
+        container.innerHTML = '';
+
+        Object.keys(QUALITY_TEMPLATES).forEach(key => {
+            const tpl = QUALITY_TEMPLATES[key];
+            const btn = document.createElement('button');
+            btn.className = 'btn-preset';
+            btn.style.background = '#34495e';
+            btn.innerHTML = `${tpl.nameEn} <span style="font-size:0.75rem; display:block; font-weight:normal;">(${tpl.nameJa})</span>`;
+            btn.onclick = () => checkQualityGameAnswer(key);
+            container.appendChild(btn);
+        });
+    }
+
+    function checkQualityGameAnswer(chosenKey) {
+        if (!currentQuizQualityKey) return;
+        
+        const statusEl = document.getElementById('gq-status');
+        const correctTpl = QUALITY_TEMPLATES[currentQuizQualityKey];
+        const rootNameJp = NOTE_NAMES_JP[currentQuizQualityRoot % 12];
+        const rootNameEn = NOTE_NAMES[currentQuizQualityRoot % 12];
+
+        let displayChordFull = `${rootNameEn}${correctTpl.nameEn === 'Major' ? '' : correctTpl.nameEn} (${rootNameJp}・${correctTpl.nameEn})`;
+
+        if (chosenKey === currentQuizQualityKey) {
+            statusEl.innerText = `🎉 正解！ 答えは「 ${displayChordFull} 」でした！`;
+            statusEl.style.color = 'var(--success)';
+        } else {
+            statusEl.innerText = `😢 残念... 正解は「 ${displayChordFull} 」でした！`;
+            statusEl.style.color = 'var(--danger)';
+        }
+    }
+
+    // --- 音名あて & 基準音機能 ---
+    let currentQuizMidiNumber = 0;
+
+    function playC4Reference() {
+        initAudio();
+        const freq = 440 * Math.pow(2, (60 - 69) / 12);
+        playTone(freq, audioCtx.currentTime, 1.0);
+    }
+
+    function startPitchGame() {
+        initAudio();
+        currentQuizMidiNumber = Math.floor(Math.random() * 36) + 48; 
+        document.getElementById('pt-status').innerText = 'よく聴いて音を選んでね！基準音(C4)とも比べてみよう！👂';
+        document.getElementById('pt-status').style.color = 'var(--text)';
+        playSingleMidiNote(currentQuizMidiNumber);
+        document.getElementById('btn-pitch-repeat').disabled = false;
+    }
+
+    function repeatPitchGameSound() {
+        if (currentQuizMidiNumber) {
+            playSingleMidiNote(currentQuizMidiNumber);
+        }
+    }
+
+    function playSingleMidiNote(midiNum) {
+        initAudio();
+        const freq = 440 * Math.pow(2, (midiNum - 69) / 12);
+        playTone(freq, audioCtx.currentTime, 1.2);
+    }
+
+    function buildPitchGameUI() {
+        for (let oct = 3; oct <= 5; oct++) {
+            const container = document.getElementById(`pitch-options-${oct}`);
+            container.innerHTML = '';
+            NOTE_NAMES_JP.forEach((name, idx) => {
+                const targetMidi = (oct * 12) + 12 + idx;
+                const btn = document.createElement('button');
+                btn.className = 'btn-chord';
+                btn.style.minWidth = '55px';
+                btn.style.padding = '8px 5px';
+                btn.innerText = `${name}`;
+                btn.onclick = () => checkPitchGameAnswer(targetMidi);
+                container.appendChild(btn);
+            });
+        }
+    }
+
+    function checkPitchGameAnswer(userMidi) {
+        if (!currentQuizMidiNumber) return;
+        
+        const correctJpName = NOTE_NAMES_JP[currentQuizMidiNumber % 12];
+        const correctEnName = NOTE_NAMES[currentQuizMidiNumber % 12];
+        const correctOctave = Math.floor(currentQuizMidiNumber / 12) - 1;
+        const statusEl = document.getElementById('pt-status');
+
+        // ★修正点: 答えの音固定ではなく、ユーザーが今選んだ（タップした）選択肢の音を鳴らす
+        playSingleMidiNote(userMidi);
+
+        if (userMidi === currentQuizMidiNumber) {
+            statusEl.innerText = `🎉 大正解！ 答えは「オクターブ${correctOctave}の【 ${correctEnName} (${correctJpName}) 】」でした！`;
+            statusEl.style.color = 'var(--success)';
+        } else {
+            const userEnName = NOTE_NAMES[userMidi % 12];
+            const userJpName = NOTE_NAMES_JP[userMidi % 12];
+            const userOctave = Math.floor(userMidi / 12) - 1;
+            statusEl.innerHTML = `❌ 残念！ 今鳴ったのはあなたが選んだ「オクターブ${userOctave}の【 ${userEnName} (${userJpName}) 】」です。<br>正解は「オクターブ${correctOctave}の【 ${correctEnName} (${correctJpName}) 】」でした！もう一度問題音と聴き比べてみてね。`;
+            statusEl.style.color = 'var(--danger)';
+        }
+    }
+
+    // --- 構成音あて ---
+    let currentQuizChord = '';
+    let selectedNotes = [];
+
+    function startNotesGame() {
+        initAudio();
+        const keys = Object.keys(CHORD_TEMPLATES);
+        currentQuizChord = keys[Math.floor(Math.random() * keys.length)];
+        const info = getChordInfo(currentQuizChord);
+        
+        document.getElementById('ng-question').innerText = `出題コード: 【 ${info.name} 】`;
+        document.getElementById('ng-status').innerText = '構成音をすべて選んでね！';
+        document.getElementById('ng-status').style.color = 'var(--text)';
+        
+        selectedNotes = [];
+        playChordById(currentQuizChord, 0, 1.2, false);
+        document.getElementById('btn-notes-repeat').disabled = false;
+        renderKeyboardOptions();
+    }
+
+    function repeatNotesGameSound() {
+        if (currentQuizChord) {
+            playChordById(currentQuizChord, 0, 1.2, false);
+        }
+    }
+
+    function renderKeyboardOptions() {
+        const container = document.getElementById('keyboard-options');
+        container.innerHTML = '';
+        NOTE_NAMES_JP.forEach((name, idx) => {
+            const btn = document.createElement('button');
+            btn.className = 'key-btn';
+            btn.innerText = name;
+            btn.onclick = () => toggleNoteSelect(idx, btn);
+            container.appendChild(btn);
+        });
+    }
+
+    function toggleNoteSelect(noteIdx, btnEl) {
+        initAudio();
+        const freq = 440 * Math.pow(2, ((60 + noteIdx) - 69) / 12);
+        playTone(freq, audioCtx.currentTime, 0.4);
+
+        if (selectedNotes.includes(noteIdx)) {
+            selectedNotes = selectedNotes.filter(n => n !== noteIdx);
+            btnEl.classList.remove('selected');
+        } else {
+            selectedNotes.push(noteIdx);
+            btnEl.classList.add('selected');
+        }
+    }
+
+    function checkNotesGameAnswer() {
+        if (!currentQuizChord) return;
+        const info = getChordInfo(currentQuizChord);
+        const correctNotes = info.absoluteNotes;
+
+        const isCorrect = correctNotes.length === selectedNotes.length && 
+                          correctNotes.every(n => selectedNotes.includes(n));
+
+        const statusEl = document.getElementById('ng-status');
+        if (isCorrect) {
+            statusEl.innerText = `⭕ 正解！ 構成音は [ ${info.labels.join(', ')} ] です！`;
+            statusEl.style.color = 'var(--success)';
+        } else {
+            statusEl.innerText = `❌ 残念！正解は [ ${info.labels.join(', ')} ] でした。`;
+            statusEl.style.color = 'var(--danger)';
+        }
+    }
+
+    // --- 進行みみコピ ---
+    let currentQuizProgName = '';
+
+    function startProgGame() {
+        initAudio();
+        document.getElementById('pg-status').innerText = '再生中...👂';
+        document.getElementById('pg-status').style.color = 'var(--text)';
+        
+        const keys = Object.keys(PROGRESSIONS).filter(k => k !== '12小節ブルース');
+        currentQuizProgName = keys[Math.floor(Math.random() * keys.length)];
+        
+        playProgressionSound();
+        document.getElementById('btn-prog-repeat').disabled = false;
+
+        const options = [currentQuizProgName];
+        while(options.length < 4) {
+            const randName = keys[Math.floor(Math.random() * keys.length)];
+            if(!options.includes(randName)) options.push(randName);
+        }
+        options.sort(() => Math.random() - 0.5);
+
+        const optionsContainer = document.getElementById('pg-options');
+        optionsContainer.innerHTML = '';
+        options.forEach(optName => {
+            const btn = document.createElement('button');
+            btn.className = 'btn-preset';
+            btn.style.background = '#34495e';
+            btn.innerHTML = optName;
+            btn.onclick = () => checkProgGameAnswer(optName);
+            optionsContainer.appendChild(btn);
+        });
+    }
+
+    function repeatProgGameSound() {
+        if (currentQuizProgName) {
+            playProgressionSound();
+        }
+    }
+
+    function playProgressionSound() {
+        const prog = PROGRESSIONS[currentQuizProgName];
+        const tempo = 0.9;
+        prog.forEach((ch, idx) => {
+            playChordById(ch, idx * tempo, tempo - 0.05, false);
+        });
+    }
+
+    function checkProgGameAnswer(chosenName) {
+        const statusEl = document.getElementById('pg-status');
+        if (chosenName === currentQuizProgName) {
+            statusEl.innerText = `🎉 正解！これは「${currentQuizProgName}」です！`;
+            statusEl.style.color = 'var(--success)';
+        } else {
+            statusEl.innerText = `😢 違いそう... 正解は「${currentQuizProgName}」でした！`;
+            statusEl.style.color = 'var(--danger)';
+        }
+    }
+
+    window.onload = () => {
+        renderChordsPool();
+        renderKeyboardOptions();
+        buildPitchGameUI();
+        buildQualityGameUI();
+        buildScaleGameUI();
+        buildIntervalGameUI();
+    };
+</script>
+
+</body>
+</html>
